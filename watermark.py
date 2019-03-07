@@ -3,6 +3,9 @@ import sys
 import logging
 from PIL import Image
 
+_OUTPUT_FOLDER = 'images_new'
+folder_name = None
+
 logging.basicConfig(filename='imageWaterMark.log',level=logging.INFO)
 if len(sys.argv) < 3:
     print('Usage: watermark.py \'image folder path\' \'logo path\' [topleft, topright, bottomleft, bottomright, center]')
@@ -20,9 +23,19 @@ logo = Image.open(lgo)
 logoWidth = logo.width
 logoHeight = logo.height
 count = 0
+print("Analizando " + path)
+#Folder Creation
+folder_name = _OUTPUT_FOLDER + '/'+path.split('/')[1]
+print(folder_name)
+try:
+    os.makedirs(folder_name)
+except FileExistsError:
+    pass
+
+
 
 for filename in os.listdir(path):
-    if (filename.endswith('.jpg') or filename.endswith('.png')) and (filename != lgo):
+    if (filename.endswith('.jpg') or filename.endswith('.png')) and (filename != logo):
         try:
             image = Image.open(path + '/' + filename)
         except:
@@ -35,7 +48,7 @@ for filename in os.listdir(path):
         except:
              logging.error('Error durante image resize'+ filename)
         count+=1
-        print count
+        
         try:
             if pos == 'topleft':
                 image.paste(logo, (0, 0), logo)
@@ -54,10 +67,11 @@ for filename in os.listdir(path):
                 print('Error: ' + pos + ' is not a valid position')
                 print('Usage: watermark.py \'image path\' \'logo path\' [topleft, topright, bottomleft, bottomright, center]')
 
-            image.save('image_new' + '/' + filename)
+            
+            image.save(folder_name + '/' + filename)
             print('Added watermark to ' + path + '/' + filename)
 
         except:
             image.paste(logo, ((imageWidth - logoWidth)/2, (imageHeight - logoHeight)/2), logo)
-            image.save('image_new' + '/' + filename)
-            print('Added default watermark to ' + 'image_new' + '/' + filename)
+            image.save(folder_name + '/' + filename)
+            print('Added default watermark to ' + folder_name + '/' + filename)
